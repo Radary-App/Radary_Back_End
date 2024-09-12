@@ -51,6 +51,15 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.title
+
+class Review:
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=255)
+    difficulty = models.BooleanField()
+    is_solved = models.BooleanField()
+    def __str__(self):
+        return f"Review from {self.user.firstname} with the comment: {self.comment}"
+
 # Optional Admin-specific model if needed
 class Dashboard(models.Model):
     data = models.TextField()
