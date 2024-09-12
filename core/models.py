@@ -41,6 +41,11 @@ class Issue(models.Model):
         ('face_2', 'Reported and seen'),
         ('face_3', 'Reported and seen and solved'),
     ]
+
+    CAT = [
+        ('issue', 'Issue'),
+        ('emergency', 'Emergency'),
+    ]
     title = models.CharField(max_length=255)
     description = models.TextField()
     address = models.CharField(max_length=255)
@@ -48,7 +53,7 @@ class Issue(models.Model):
     level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
-
+    category = models.CharField(max_length=10, choices=CAT, default='open')
     def __str__(self):
         return self.title
 
@@ -73,7 +78,10 @@ class AI(models.Model):
     ai_description = models.TextField(null=True, blank=True)
     ai_solution = models.TextField(null=True, blank=True)
     ai_danger_level = models.CharField(max_length=10, choices=Issue.LEVEL_CHOICES, null=True, blank=True)
-
+    priority = models.CharField(max_length=10, choices=Issue.LEVEL_CHOICES, null=True, blank=True)
+    concerned_authority_name = models.TextField(null=True, blank=True)
+    nearest_branch = models.TextField(null=True, blank=True)
+    report_id = models.ForeignKey(Issue, on_delete=models.CASCADE)
     def __str__(self):
         return f"AI Analysis for Issue: {self.issue.title}"
     
