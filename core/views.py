@@ -5,7 +5,7 @@ from rest_framework import status
 from .models import  Issue,  Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate
-from .serializers import IssueSerializer, UserSerializer
+from .serializers import IssueSerializer, UserSerializer, ReviewSerializer, IssueDetailSerializer
 from django.utils.crypto import get_random_string
 from .authentication import TokenAuthentication
 
@@ -53,3 +53,56 @@ class IssueListView(APIView):
         return Response(issues)
 
 
+class UserIssueListView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get the issues that belong to the authenticated user
+        user = request.user
+        user_issues = Issue.objects.filter(user=user)  # Filter issues by user
+
+        # Serialize the filtered issues
+        serializer = IssueSerializer(user_issues, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CreateReviewView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, issue_id):
+ 
+
+        try:
+            issue = Issue.objects.get(id=issue_id)
+        except Issue.DoesNotExist:
+            return Response({"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create a new review
+        review_data = {
+            'issue': issue.id,
+            'text': request.data.get('text'),
+        }
+        
+        serializer = ReviewSerializer(data=review_data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class IssueDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, issue_id):
+        try:
+            issue = Issue.objects.get(id=issue_id)
+        except Issue.DoesNotExist:
+            return Response({"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize issue details along with its reviews
+        serializer = IssueDetailSerializer(issue)
+        return Response(serializer.data, status=status.HTTP_200_OK)

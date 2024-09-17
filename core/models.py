@@ -51,14 +51,14 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.title
-# Optional Admin-specific model if needed
-class Dashboard(models.Model):
-    data = models.TextField()
-    admin = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"Admin Dashboard for {self.admin.username}"
-    
+
+
+
+class Review(models.Model):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
+    text  = models.TextField()
+
 class AI(models.Model):
     issue = models.OneToOneField(Issue, on_delete=models.CASCADE)
     ai_description = models.TextField(null=True, blank=True)

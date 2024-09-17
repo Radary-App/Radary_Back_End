@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Issue, User
+from .models import Issue, User, Review
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -24,3 +24,19 @@ class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
         fields = ['title', 'description', 'address', 'photo', 'level']
+class IssueDetailSerializer(serializers.ModelSerializer):
+    reviews = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Issue
+        fields = ['id', 'title', 'description', 'address', 'photo', 'level', 'status', 'reviews']
+
+    def get_reviews(self, obj):
+        # Get all reviews related to the issue
+        reviews = Review.objects.filter(issue=obj)
+        return ReviewSerializer(reviews, many=True).data
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ["id", 'issue', 'text']
