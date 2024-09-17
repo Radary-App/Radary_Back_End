@@ -9,7 +9,7 @@ class TokenAuthentication(BaseAuthentication):
             return None
 
         try:
-            token = token.split(' ')[1]  # Remove 'Token ' prefix
+            token = token.split(' ')[1]
             token_obj = Token.objects.get(token=token)
         except (IndexError, Token.DoesNotExist):
             raise AuthenticationFailed('Invalid token.')

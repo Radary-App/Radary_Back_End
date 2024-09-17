@@ -1,4 +1,4 @@
-from .models import User, Issue, AI
+from .models import User, Report, AI
 from django.contrib import admin
 
 
@@ -9,24 +9,24 @@ class UserAdmin(admin.ModelAdmin):
 
 
 # -----------------------------
-# Customizing Issue admin view
-class IssueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'address', 'level', 'user')
-    search_fields = ('title', 'address')
-    list_filter = ('level',)
+# Customizing Report admin view
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ('category', 'status', 'user')
+    search_fields = ('user',)
+    list_filter = ('category', 'status')
 
 
 # ---------------------------
 # Customizing AI admin view
 class AIAdmin(admin.ModelAdmin):
-    list_display = ('issue', 'ai_description', 'ai_solution', 'ai_danger_level')
-    search_fields = ('ai_description', 'ai_solution')
-    list_filter = ('ai_danger_level',)
+    list_display = ('report', 'description', 'solution', 'danger_level')
+    search_fields = ('description', 'solution')
+    list_filter = ('danger_level',)
 
 
 
 # Registering models in Django admin
 admin.site.register(User, UserAdmin)
-admin.site.register(Issue, IssueAdmin)
+admin.site.register(Report, ReportAdmin)
 admin.site.register(AI, AIAdmin)
 

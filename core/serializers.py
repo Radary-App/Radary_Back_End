@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from .models import Issue, User
+from .models import Report, User
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'is_active', 'is_admin']
+        fields = ['username', 'password', 'email', 'is_admin']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -15,12 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            is_active=True  # Default activation logic, or change as needed
+            is_admin=False,
         )
         return user
 
-# Issue Serializer
-class IssueSerializer(serializers.ModelSerializer):
+# Report Serializer
+class ReportSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Issue
+        model = Report
         fields = ['title', 'description', 'address', 'photo', 'level']

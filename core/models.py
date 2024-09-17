@@ -2,68 +2,97 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-
+import datetime
 # Custom User model
 class User(AbstractUser):
-    is_admin = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
-    email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    password = models.CharField(max_length=255)
-    last_login = models.DateTimeField(default=timezone.now)
-    governorate = models.CharField(max_length=255, null=True, blank=True)
-    markaz = models.CharField(max_length=255, null=True, blank=True)
-    date_of_birth = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(unique=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+
+    is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.username
+        return f"User - {self.username} with email {self.email}"
 
 # Token model for storing authentication tokens
 class Token(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    token = models.CharField(max_length=255)
+    token = models.CharField(max_length=255, unique=True)
 
-
-# Issue model
-class Issue(models.Model):
-    LEVEL_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('emergency', 'Emergency'),
-    ]
-
+# Report model
+class Report(models.Model):
     STATUS_CHOICES = [
         ('face_1', 'Reported'),
         ('face_2', 'Reported and seen'),
         ('face_3', 'Reported and seen and solved'),
     ]
 
-    CAT = [
+    CATEGORY = [
         ('issue', 'Issue'),
         ('emergency', 'Emergency'),
     ]
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    address = models.CharField(max_length=255)
-    photo = models.ImageField(upload_to='issue_photos/')
-    level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
-    category = models.CharField(max_length=10, choices=CAT, default='open')
+    photo = models.ImageField(upload_to='report_photos/')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='face_1')
+    category = models.CharField(max_length=10, choices=CATEGORY, default='issue')
+
+    x_coordinate = models.FloatField()
+    y_coordinate = models.FloatField()
+    longitude = models.FloatField()
+    latitude = models.FloatField()
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
     def __str__(self):
-        return self.title
+        return f"Report {self.category} by {self.user.username} on {self.created_at} with status {self.status}"
 
 class Review:
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=255)
     difficulty = models.BooleanField()
     is_solved = models.BooleanField()
+
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
     def __str__(self):
-        return f"Review from {self.user.firstname} with the comment: {self.comment}"
+        return f"Review by {self.user.username} on {self.comment}"
+
+
+class Authority(models.Model):
+    name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    specialty = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    website = models.URLField(null=True, blank=True)
+
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Authority: {self.name} with the specialty: {self.specialty}"
+
+
+class Authority_Locations(models.Model):
+    authority = models.ForeignKey(Authority, on_delete=models.CASCADE)
+    governorate = models.CharField(max_length=255)
+    markaz = models.CharField(max_length=255)
+    x_coordinate = models.FloatField()
+    y_coordinate = models.FloatField()
+    longitude = models.FloatField()
+    latitude = models.FloatField()
+
+    def __str__(self):
+        return f"Authority: {self.authority.name} in {self.governorate}, {self.markaz}"
+    
 
 # Optional Admin-specific model if needed
 class Dashboard(models.Model):
@@ -74,17 +103,14 @@ class Dashboard(models.Model):
         return f"Admin Dashboard for {self.admin.username}"
     
 class AI(models.Model):
-    issue = models.OneToOneField(Issue, on_delete=models.CASCADE)
-    ai_description = models.TextField(null=True, blank=True)
-    ai_solution = models.TextField(null=True, blank=True)
-    ai_danger_level = models.CharField(max_length=10, choices=Issue.LEVEL_CHOICES, null=True, blank=True)
-    priority = models.CharField(max_length=10, choices=Issue.LEVEL_CHOICES, null=True, blank=True)
-    concerned_authority_name = models.TextField(null=True, blank=True)
-    nearest_branch = models.TextField(null=True, blank=True)
-    report_id = models.ForeignKey(Issue, on_delete=models.CASCADE)
+    report = models.OneToOneField(Report, on_delete=models.CASCADE)
+    description = models.TextField(null=True, blank=True)
+    solution = models.TextField(null=True, blank=True)
+    danger_level = models.IntegerField(null=True, default=0)
+    authority_name = models.ForeignKey(Authority, related_name='authority_name', on_delete=models.CASCADE, null=True, blank=True)
+
     def __str__(self):
-        return f"AI Analysis for Issue: {self.issue.title}"
-    
+        return f"AI Analysis for Report: {self.report.category} by {self.report.user.username}"
 
 
 
