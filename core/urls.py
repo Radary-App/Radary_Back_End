@@ -1,6 +1,9 @@
 from django.urls import path
-from .views import SignUpView, LoginView, IssueListView, CreateIssueView, IssueDetailView, CreateReviewView, UserIssueListView
-
+from .views import ( SignUpView,
+    LoginView, IssueListView, 
+    CreateIssueView, IssueDetailView, 
+    CreateEmergencyView, UserIssueListView, CreateReviewView
+)
 urlpatterns = [
     path('signup/', SignUpView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
@@ -9,4 +12,5 @@ urlpatterns = [
     path('issue/<int:pk>/', IssueDetailView.as_view(), name='issue_detail'),
     path('issue/<int:pk>/add/review/', CreateReviewView.as_view(), name='issue_review'),
     path("issue/profile/" , UserIssueListView.as_view(), name="user_issues"),
+    path('emergency/', CreateEmergencyView.as_view(), name='create_emergency'),
 ]

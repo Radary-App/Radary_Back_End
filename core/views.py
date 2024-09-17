@@ -30,6 +30,7 @@ class LoginView(APIView):
             Token.objects.update_or_create(user=user, defaults={'token': token})
             return Response({'token': token}, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
 class CreateIssueView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -66,6 +67,7 @@ class UserIssueListView(APIView):
         serializer = IssueSerializer(user_issues, many=True)
         
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
 class CreateReviewView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -106,3 +108,14 @@ class IssueDetailView(APIView):
         # Serialize issue details along with its reviews
         serializer = IssueDetailSerializer(issue)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreateEmergencyView(APIView):
+
+    def post(self, request):
+        user = request.user
+        serializer = IssueSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

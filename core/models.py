@@ -5,7 +5,7 @@ from django.utils import timezone
 
 # Custom User model
 class User(AbstractUser):
-    is_admin = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False,)
     created_at = models.DateTimeField(default=timezone.now)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
@@ -41,12 +41,17 @@ class Issue(models.Model):
         ('face_2', 'Reported and seen'),
         ('face_3', 'Reported and seen and solved'),
     ]
+    CATEGORY_CHOICES = [
+        ("I", "issue"),
+        ("E", "emergncy")
+    ]
+    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES)
     title = models.CharField(max_length=255)
     description = models.TextField()
     address = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='issue_photos/')
     level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
 
     def __str__(self):

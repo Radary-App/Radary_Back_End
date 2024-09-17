@@ -23,13 +23,13 @@ class UserSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
-        fields = ['title', 'description', 'address', 'photo', 'level']
+        fields = ['title', 'description', 'address', 'photo', 'level', "category"]
 class IssueDetailSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = Issue
-        fields = ['id', 'title', 'description', 'address', 'photo', 'level', 'status', 'reviews']
+        fields = ['id', 'title', 'description', 'address', 'photo', 'level', 'status', 'reviews', "category"]
 
     def get_reviews(self, obj):
         # Get all reviews related to the issue
