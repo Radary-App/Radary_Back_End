@@ -20,6 +20,7 @@ class SignUpView(APIView):
             return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -37,23 +38,17 @@ class LoginView(APIView):
 
 
 class CreateReportView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            response = super().dispatch(request, *args, **kwargs)
-        except AuthenticationFailed:
-            emergency_user = User.objects.get(username='EMERGENCY_USER')
-            request.user = emergency_user
-            response = super().dispatch(request, *args, **kwargs)
-        else:
-            pass
-        return response
-
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
-        user = request.user
+        print("Creating report")
+        if not request.user.is_authenticated and request.data.get['category'] == 'emergency':
+            user = request.user if request.user.is_authenticated else User.objects.get(username='emergency_user')
+        else:
+            return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = ReportSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=user)

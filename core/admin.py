@@ -11,7 +11,7 @@ class UserAdmin(admin.ModelAdmin):
 # -----------------------------
 # Customizing Report admin view
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('category', 'status', 'user')
+    list_display = ('category', 'status', 'user', 'coordinates')
     search_fields = ('user',)
     list_filter = ('category', 'status')
 
