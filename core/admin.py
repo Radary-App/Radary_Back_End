@@ -1,32 +1,46 @@
-from .models import User, Issue, AI
+from .models import User, Problem, Emergency, AI_Emergency, AI_Problem, Authority, Authority_Locations
 from django.contrib import admin
 
-
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'is_active', 'is_admin')
-    search_fields = ('email', 'username')
+    list_display = ('email', 'username', 'is_admin', 'date_of_birth', 'phone_number', 'governorate', 'markaz')
+    search_fields = ('email', 'username', 'first_name', 'phone_number')
     list_filter = ('is_admin',)
 
 
 # -----------------------------
-# Customizing Issue admin view
-class IssueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'address', 'level', 'user')
-    search_fields = ('title', 'address')
-    list_filter = ('level',)
+# Customizing Report admin view
+class ProblmAdmin(admin.ModelAdmin):
+    list_display = ('status', 'user', 'user_description',  'coordinates')
+    search_fields = ('user',)
+    list_filter = ('status',)
 
+
+class EmergencyAdmin(admin.ModelAdmin):
+    list_display = ('user', 'coordinates')
+    search_fields = ('user',)
+    list_filter = ('coordinates',)
 
 # ---------------------------
 # Customizing AI admin view
-class AIAdmin(admin.ModelAdmin):
-    list_display = ('issue', 'ai_description', 'ai_solution', 'ai_danger_level')
-    search_fields = ('ai_description', 'ai_solution')
-    list_filter = ('ai_danger_level',)
+class AI_ProblemAdmin(admin.ModelAdmin):
+    list_display = ('report', 'title', 'description', 'priority', 'authority_name')
+    search_fields = ('description', 'priority')
+    list_filter = ('priority', 'authority_name')
 
-
+class AI_EmergencyAdmin(admin.ModelAdmin):
+    list_display = ('report', 'title', 'description', 'danger_level', 'authority_name')
+    search_fields = ('description', 'danger_level')
+    list_filter = ('danger_level', 'authority_name')
 
 # Registering models in Django admin
 admin.site.register(User, UserAdmin)
-admin.site.register(Issue, IssueAdmin)
-admin.site.register(AI, AIAdmin)
+
+admin.site.register(Problem)
+admin.site.register(AI_Problem, AI_ProblemAdmin)
+
+admin.site.register(Authority)
+admin.site.register(Authority_Locations)
+
+admin.site.register(Emergency, EmergencyAdmin)
+admin.site.register(AI_Emergency, AI_EmergencyAdmin)
 
