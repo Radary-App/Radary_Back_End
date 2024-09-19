@@ -13,7 +13,7 @@ class User(AbstractUser):
 
     email = models.EmailField(null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-
+    image = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     governorate = models.CharField(max_length=255, null=True, blank=True)
     markaz = models.CharField(max_length=255, null=True, blank=True)
 
@@ -45,6 +45,7 @@ class Problem(models.Model):
     photo = models.ImageField(upload_to='problem_photos/', blank=True, null=True) ## change to required in production
     user_description = models.CharField(max_length=255, null=True, blank=True)
     
+    conclusion = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
@@ -65,7 +66,7 @@ class Emergency(models.Model):
 
 class Review(models.Model):
     related_user = models.ForeignKey(User, on_delete=models.CASCADE)
-    related_report = models.ForeignKey(Problem, related_name='reviews', on_delete=models.CASCADE)
+    related_report = models.ForeignKey(Problem, related_name='review', on_delete=models.CASCADE)
     comment = models.CharField(max_length=255, null=True, blank=True)
     difficulty = models.BooleanField()
     is_solved = models.BooleanField()
@@ -79,20 +80,15 @@ class Review(models.Model):
 
 class Authority(models.Model):
     name = models.CharField(max_length=255)
+    email = models.EmailField()
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    specialty = models.CharField(max_length=255, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-    website = models.URLField(null=True, blank=True)
+
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Authority: {self.name} with the specialty: {self.specialty}"
-
-# Police
-# Fire station
-# Hospital
+        return f"Authority: {self.name} with email: {self.email}"
 
 class Authority_Locations(models.Model):
     authority = models.ForeignKey(Authority, on_delete=models.CASCADE)
@@ -117,9 +113,10 @@ class Dashboard(models.Model):
 class AI_Problem(models.Model):
     report = models.OneToOneField(Problem, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
-    solution = models.TextField(null=True, blank=True)
-    danger_level = models.IntegerField(null=True, default=0)
-    authority_name = models.ForeignKey(Authority, related_name='ai_problems_authority_ai', on_delete=models.CASCADE, null=True, blank=True)
+    priority = models.IntegerField(null=True, default=0) # 1 - 5 --> 1 is the highest
+    authority_name = models.ForeignKey(Authority, related_name='ai_problems', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    subdivision = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"AI_Problem Analysis for Report_ID: {self.report.id} by {self.report.user.username}"
@@ -127,9 +124,20 @@ class AI_Problem(models.Model):
 class AI_Emergency(models.Model):
     report = models.OneToOneField(Emergency, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
-    solution = models.TextField(null=True, blank=True)
-    danger_level = models.IntegerField(null=True, default=-1)
-    authority_name = models.ForeignKey(Authority, related_name='ai_emergency_authority_ai', on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    danger_level = models.IntegerField(null=True, default=0) # 1 - 100 --> 100 is the highest
+    authority_name = models.ForeignKey(Authority, related_name='ai_emergencies', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"AI_Emergency Analysis for Report_ID: {self.report.id} by {self.report.user.username}"
+
+
+class Summary(models.Model):
+    summary = models.CharField(max_length=1500)
+    review_ids = models.CharField(max_length=255)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Summary for reports: {self.review_ids}"

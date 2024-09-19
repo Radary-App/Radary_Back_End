@@ -1,0 +1,40 @@
+Sample of user feedbacks list in english 
+
+[
+    "Excellent App, But Needs Improvement in Navigation - I’ve been using this app for a while now, and I must say it’s been a game-changer for me. The features are amazing, and the UI is clean and intuitive. However, I’ve noticed that the navigation can be a bit clunky at times. It takes a few extra taps to get to where I want to go. If you could streamline the navigation, that would be awesome. Overall, great job, and I’m excited to see future updates!",
+    "Love the New Features, But Battery Life Suffers - I was thrilled to see the new features in the latest update, but unfortunately, my battery life has taken a hit. I’m not sure if it’s the new features or something else, but I’m having to charge my phone more frequently than before. Could you please look into optimizing the app’s performance to reduce battery drain? I love the app, but I don’t want to have to choose between using it and having a dead battery.",
+    "Great Concept, But Needs More Content - I love the idea behind this app, and I think it has a lot of potential. However, I’ve noticed that there’s not a lot of content available. I’ve gone through everything in a few days, and I’m eager for more. Could you please add more content or provide a way for users to contribute their own content? I’d love to see this app grow and become a go-to destination for [topic].",
+    "Needs More Customization Options - I love the app, but I wish there were more customization options available. I’d like to be able to personalize the UI and features to fit my needs better. Could you please add more customization options in future updates? I think this would make the app even more enjoyable to use.",
+    "I absolutely love the new feature, it's exactly what I've been waiting for!",
+    "The UI is really confusing, I've been trying to figure it out for hours but I still can't get the hang of it.",
+    "Can you please add more customization options, I want to be able to personalize my experience?",
+    "The app is so slow, it takes forever to load and it's really frustrating.",
+    "I'm not sure what this feature does, can you please provide more instructions or a tutorial?",
+    "Can you please make the font size bigger, I'm having trouble reading the text?",
+    "I'm getting an error message when I try to login, it says my password is incorrect but I know it's right.",
+    "The app is really easy to use, I was able to figure it out right away.",
+    "I don't like the new design, it's too cluttered and overwhelming.",
+    "Can you please add a dark mode, it would be easier on my eyes?",
+    "I'm having trouble with the payment process, it keeps saying my card is declined but I know it's valid."
+]
+
+
+Sample of user feedbacks list in arabic 
+
+[
+    "تطبيق رائع، لكنه يحتاج إلى تحسين في التنقل - لقد كنت أستخدم هذا التطبيق منذ فترة الآن، ويجب أن أقول إنه كان مغير اللعبة بالنسبة لي. الميزات رائعة، وواجهة المستخدم نظيفة وسهلة الاستخدام. ومع ذلك، لاحظت أن التنقل يمكن أن يكون قليلاً متعثراً في بعض الأحيان. يأخذ بضع نقرات إضافية للوصول إلى حيث أريد أن أذهب. إذا كنت تستطيع تحسين التنقل، فسيكون رائعاً. بشكل عام، عمل رائع، وأنا متحمس لرؤية التحديثات المستقبلية!",
+    "أحب الميزات الجديدة، لكن حياة البطارية تتعرض للخطر - كنت مسروراً برؤية الميزات الجديدة في التحديث الأخير، ولكن للأسف، حياة بطاريتي تتعرض للخطر. لا أعرف ما إذا كانت الميزات الجديدة أو شيء آخر، ولكنني أضطر إلى شحن هاتفي أكثر من مرة قبل. يمكنك من فضلك النظر في تحسين أداء التطبيق لخفض استهلاك البطارية؟ أحب التطبيق، ولكنني لا أريد أن أضطر إلى اختيار بين استخدام التطبيق وامتلاك بطارية ميتة.",
+    "مفهوم رائع، لكنه يحتاج إلى المزيد من المحتوى - أحب الفكرة خلف هذا التطبيق، وأعتقد أن لديه الكثير من الإمكانات. ومع ذلك، لاحظت أن هناك قليلاً من المحتوى المتاح. لقد مررت بكل شيء في بضعة أيام، وأنا متحمس لمعرفة المزيد. يمكنك من فضلك إضافة المزيد من المحتوى أو توفير طريقة للمستخدمين لتقديم محتوىهم الخاص؟ أحب أن أرى هذا التطبيق ينمو ويصبح وجهة رئيسية ل[الموضوع].",
+    "يحتاج إلى المزيد من خيارات التخصيص - أحب التطبيق، ولكنني أتمنى أن هناك المزيد من خيارات التخصيص المتاحة. أحب أن أكون قادراً على تخصيص واجهة المستخدم والميزات لتناسب احتياجاتي بشكل أفضل. يمكنك من فضلك إضافة المزيد من خيارات التخصيص في التحديثات المستقبلية؟ أعتقد أن هذا سيعمل على جعل التطبيق أكثر متعة للاستخدام.",
+    "أحب الميزة الجديدة، وهي بالضبط ما كنت أتمنى!",
+    "واجهة المستخدم متعبة جداً، لقد كنت أحاول معرفة كيفية استخدامها لساعات ولكنني لا أزال لا أستطيع فهمها.",
+    "يمكنك من فضلك إضافة المزيد من خيارات التخصيص، أريد أن أكون قادراً على تخصيص تجربتي!",
+    "التطبيق بطيء جداً، يأخذ وقتاً طويلاً لتحميله ويسبب الإزعاج.",
+    "أنا لا أعرف ما هذه الميزة تفعل، يمكنك من فضلك توفير المزيد من التعليمات أو دروس تعليمية؟",
+    "يمكنك من فضلك جعل حجم الخط أكبر، أنا أتعب من قراءة النص!",
+    "أنا أحصل على رسالة خطأ عند محاولة الدخول، تقول إن كلمة المرور غير صحيحة ولكنني أعرف أنها صحيحة.",
+    "التطبيق سهل الاستخدام جداً، لقد استطعت معرفة كيفية استخدامه على الفور.",
+    "لا أحب التصميم الجديد، فهو مزدحم جداً ومربك.",
+    "يمكنك من فضلك إضافة وضع مظلم، سيكون أسهل على عيني!",
+    "أنا أحصل على مشكلة مع عملية الدفع، تقول إن بطاقتي مرفوضة ولكنني أعرف أنها صالحة."
+]

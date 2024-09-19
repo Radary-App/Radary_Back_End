@@ -11,7 +11,6 @@ from .serializers import UserSerializer, ProblemSerializer, EmergencySerializer,
 from django.utils.crypto import get_random_string
 from .authentication import TokenAuthentication
 
-
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
@@ -69,7 +68,6 @@ class ProblemListView(APIView):
 class CreateEmergencyView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    # permission_classes = [AllowAny]
 
     def post(self, request):
         print("Creating Emergency")
