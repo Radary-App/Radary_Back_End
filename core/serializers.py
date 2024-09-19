@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Report, User
-
+from .models import User, Problem, Emergency, Review
+import random, re
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,26 +11,109 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        username = validated_data['first_name'] + "@" + validated_data['last_name'] + '_' + str(range(0, 100))
+        random_number = random.randint(1, 1000)
+        username = validated_data['first_name'] + "@" + validated_data['last_name'] + '_' + str(random_number)
         user = User.objects.create_user(
             username=username,
-            firstname=validated_data['first_name'],
-            lastname=validated_data['last_name'],
-            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            phone_number=validated_data['phone_number'],
             password=validated_data['password'],
 
-
             is_admin=False,
-            phone_number=validated_data['phone_number'],
-            date_of_birth=validated_data['date_of_birth'],
+            date_of_birth=validated_data['date_of_birth'] if 'date_of_birth' in validated_data else None,
 
-            governorate=validated_data['governorate'],
-            markaz=validated_data['markaz'],
+            email=validated_data['email'] if 'email' in validated_data else None,
+            governorate=validated_data['governorate'] if 'governorate' in validated_data else None,
+            markaz=validated_data['markaz'] if 'markaz' in validated_data else None,
         )
         return user
 
-# Report Serializer
-class ReportSerializer(serializers.ModelSerializer):
+# Problem Serializer
+class ProblemSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(required=False, read_only=True)
+    id = serializers.IntegerField(required=False, read_only=True)
     class Meta:
-        model = Report
-        fields = ['category', 'coordinates', 'user_description', 'photo']
+        model = Problem
+        fields = ['coordinates', 'user_description', 'photo', 'status', 'user', 'id']
+
+    def validate(self, data):
+        coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
+        if not re.match(coordinates_pattern, data.get('coordinates', '')):
+            raise serializers.ValidationError({"coordinates": "Coordinates must be in the format 'lat, long'"})
+        if 'photo' not in data:
+            raise serializers.ValidationError({"photo": "Photo is required"})
+        return data
+
+    def create(self, validated_data):
+        problem = Problem.objects.create(
+            user=validated_data['user'],
+            coordinates=validated_data['coordinates'],
+            photo=validated_data['photo'],
+            user_description=validated_data['user_description'] if 'user_description' in validated_data else None
+        )
+        return problem
+
+
+class EmergencySerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False, read_only=True)
+    class Meta:
+        model = Emergency
+        fields = ['coordinates', 'photo', 'user', 'id']
+
+    def validate(self, data):
+        coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
+        if not re.match(coordinates_pattern, data.get('coordinates', '')):
+            raise serializers.ValidationError({"coordinates": "Coordinates must be in the format 'lat, long'"})
+        if 'photo' not in data:
+            raise serializers.ValidationError({"photo": "Photo is required"})
+        return data
+
+    def create(self, validated_data):
+        problem = Emergency.objects.create(
+            user=validated_data['user'],
+            coordinates=validated_data['coordinates'],
+            photo=validated_data['photo'],
+        )
+        return problem
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['is_solved', 'difficulty', 'comment']
+
+    def create(self, validated_data):
+        related_user = self.context['related_user']
+        related_report = self.context['related_report']
+
+        review = Review.objects.create(
+            related_user=related_user,
+            related_report=related_report,
+            is_solved=validated_data['is_solved'],
+            difficulty=validated_data['difficulty'],
+            comment=validated_data['comment'] if 'comment' in validated_data else None
+        )
+        return review
+    
+class NOOSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Emergency
+        fields = ['coordinates', 'photo']
+
+    def validate(self, data):
+        coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
+        if not re.match(coordinates_pattern, data.get('coordinates', '')):
+            raise serializers.ValidationError({"coordinates": "Coordinates must be in the format 'lat, long'"})
+        if 'photo' not in data:
+            raise serializers.ValidationError({"photo": "Photo is required"})
+        return data
+
+    def create(self, validated_data):
+        user = User.objects.get(id=1)
+        problem = Emergency.objects.create(
+            user=user,
+            coordinates=validated_data['coordinates'],
+            photo=validated_data['photo'],
+        )
+        return problem

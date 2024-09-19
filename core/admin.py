@@ -1,20 +1,25 @@
-from .models import User, Report, AI
+from .models import User, Problem, Emergency, AI_Emergency, AI_Problem, Authority, Authority_Locations
 from django.contrib import admin
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'is_active', 'is_admin')
-    search_fields = ('email', 'username')
+    list_display = ('email', 'username', 'is_admin', 'date_of_birth', 'phone_number', 'governorate', 'markaz')
+    search_fields = ('email', 'username', 'first_name', 'phone_number')
     list_filter = ('is_admin',)
 
 
 # -----------------------------
 # Customizing Report admin view
-class ReportAdmin(admin.ModelAdmin):
-    list_display = ('category', 'status', 'user', 'coordinates')
+class ProblmAdmin(admin.ModelAdmin):
+    list_display = ('status', 'user', 'user_description',  'coordinates')
     search_fields = ('user',)
-    list_filter = ('category', 'status')
+    list_filter = ('status',)
 
+
+class EmergencyAdmin(admin.ModelAdmin):
+    list_display = ('user', 'coordinates')
+    search_fields = ('user',)
+    list_filter = ('coordinates',)
 
 # ---------------------------
 # Customizing AI admin view
@@ -24,9 +29,15 @@ class AIAdmin(admin.ModelAdmin):
     list_filter = ('danger_level',)
 
 
-
 # Registering models in Django admin
 admin.site.register(User, UserAdmin)
-admin.site.register(Report, ReportAdmin)
-admin.site.register(AI, AIAdmin)
+
+admin.site.register(Problem)
+admin.site.register(AI_Problem, AIAdmin)
+
+admin.site.register(Authority)
+admin.site.register(Authority_Locations)
+
+admin.site.register(Emergency, EmergencyAdmin)
+admin.site.register(AI_Emergency, AIAdmin)
 
