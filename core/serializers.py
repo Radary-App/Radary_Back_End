@@ -2,21 +2,37 @@ from rest_framework import serializers
 from .models import User, Problem, Emergency, Review, AI_Problem, AI_Emergency, Authority
 import random, re
 from Radary_AI import analyser
+from datetime import datetime
 import base64
+import logging
+logger = logging.getLogger('core')
+
+
+
+
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'password', 'email', 'is_admin', 'date_of_birth', 'phone_number', 'governorate', 'markaz']
+        fields = ['first_name', 'last_name', 'password', "image", 'email',  'date_of_birth', 'phone_number', 'governorate', 'markaz']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def validate(self, data):
-        phone_number_pattern = r'^01[0-2]\d{1,8}$'
-        if not re.match(phone_number_pattern, data.get('phone_number', '')):
-            raise serializers.ValidationError({"phone_number": "Phone number must be in the format '01X XXX XXXX'"})
+        phone_number = data.get('phone_number', None)
+        if phone_number is not None:
+            
+            cleaned_phone_number = ''.join(filter(str.isdigit, phone_number))
+         
 
+            # Check if the length is between 11 and 13
+            if len(cleaned_phone_number) < 10 or len(cleaned_phone_number) > 14:
+                raise serializers.ValidationError({
+                    'phone_number': "Phone number must be between 11 and 14 digits."
+                })
+
+        return data
     def create(self, validated_data):
         random_number = random.randint(1, 100000)
         username = validated_data['first_name'] + "@" + validated_data['last_name'] + '_' + str(random_number)
@@ -43,7 +59,15 @@ class ProblemSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, read_only=True)
     class Meta:
         model = Problem
-        fields = ['coordinates', 'user_description', 'photo', 'status', 'id']
+        fields = [
+            'coordinates',
+              "status",
+                'user_description',
+                  'photo', 
+                    "created_at",
+                      'status',
+                        'id',
+                        ]
 
     def validate(self, data):
         coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
@@ -60,19 +84,24 @@ class ProblemSerializer(serializers.ModelSerializer):
             photo=validated_data['photo'],
             user_description=validated_data['user_description'] if 'user_description' in validated_data else None
         )
-        print(problem.photo)
+        
         image = get_img_data_(problem.photo)
-        description, authority, priority = analyser.analyse_isuue(image)
-        authority_name = 'City_council'
-        subdivision = authority
-        authority_object = Authority.objects.get(name=authority_name)
-        ai_problem = AI_Problem.objects.create(
-            report=problem,
-            description=description,
-            authority_name=authority_object,
-            priority=priority,
-            subdivision=subdivision if 'subdivision' in locals() else None,
-        )
+        try:
+
+            description, authority, priority = analyser.analyse_isuue(image)
+            authority_name = 'City_council'
+            subdivision = authority
+            authority_object = Authority.objects.get(name=authority_name)
+            ai_problem = AI_Problem.objects.create(
+                report=problem,
+                description=description,
+                authority_name=authority_object,
+                priority=priority,
+                subdivision=subdivision if 'subdivision' in locals() else None,
+            )
+        except Exception as e:
+            # logger.error("An error occurred: %s", e)
+            pass
         return problem
 
 def get_img_data_(IMG_PATH):
@@ -103,19 +132,23 @@ class EmergencySerializer(serializers.ModelSerializer):
             photo=validated_data['photo'],
         )
 
-        print(emergency.photo)
+      
         image = get_img_data_(emergency.photo)
-        description, authority, level = analyser.analyse_accident(image)
-        if authority not in ['Fire_station', 'Hospital']:
-            authority = 'Police'
-        authority_object = Authority.objects.get(name=authority)
+        try:
+            description, authority, level = analyser.analyse_accident(image)
+            if authority not in ['Fire_station', 'Hospital']:
+                authority = 'Police'
+            authority_object = Authority.objects.get(name=authority)
 
-        ai_emergency = AI_Emergency.objects.create(
-            report=emergency,
-            description=description,
-            authority_name=authority_object,
-            danger_level=level,
-        )
+            ai_emergency = AI_Emergency.objects.create(
+                report=emergency,
+                description=description,
+                authority_name=authority_object,
+                danger_level=level,
+            )
+        except Exception as e:
+            pass
+            # logger.error()
         return emergency
 
 
@@ -131,12 +164,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         review = Review.objects.create(
             related_user=related_user,
             related_report=related_report,
-            is_solved=validated_data['is_solved'],
-            difficulty=validated_data['difficulty'],
+            is_solved=validated_data.get("is_solved", False),
+            difficulty=validated_data.get("difficulty", None),
             comment=validated_data['comment'] if 'comment' in validated_data else None
         )
         return review
-    
 class NOOSerializer(serializers.ModelSerializer):
     class Meta:
         model = Emergency
@@ -151,7 +183,21 @@ class NOOSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = User.objects.get(id=1)
+        try:
+            user = User.objects.get(id=1)
+        except:
+            user = User.objects.create_user(
+                    username='emergency_user',
+                    email='emergency_user@example.com',
+                    password='12345678',
+                    first_name = 'Emergency',
+                    last_name = 'User',
+                    phone_number = '123-456-7890',
+                    date_of_birth = datetime.date(year=2000, month=1, day=1)
+                )
+            user.save()
+
+
         problem = Emergency.objects.create(
             user=user,
             coordinates=validated_data['coordinates'],

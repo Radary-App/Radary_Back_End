@@ -21,9 +21,9 @@ class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
-
+    
     def __str__(self):
-        return f"User: {self.username}\n with phone number: {self.phone_number}\n and id: {self.id}"
+        return f"{self.username}"
 
 # Token model for storing authentication tokens
 class Token(models.Model):
@@ -48,7 +48,7 @@ class Problem(models.Model):
     conclusion = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
-
+    
     def __str__(self):
         return f"Report by {self.user.username} on {self.created_at} with status {self.status}"
 
@@ -68,8 +68,8 @@ class Review(models.Model):
     related_user = models.ForeignKey(User, on_delete=models.CASCADE)
     related_report = models.ForeignKey(Problem, related_name='review', on_delete=models.CASCADE)
     comment = models.CharField(max_length=255, null=True, blank=True)
-    difficulty = models.BooleanField()
-    is_solved = models.BooleanField()
+    difficulty = models.BooleanField(null=True, blank=True)
+    is_solved = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
@@ -102,12 +102,6 @@ class Authority_Locations(models.Model):
     
 
 # Optional Admin-specific model if needed
-class Dashboard(models.Model):
-    data = models.TextField()
-    admin = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Admin Dashboard for {self.admin.username}"
 
 
 class AI_Problem(models.Model):

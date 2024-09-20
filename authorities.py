@@ -17,6 +17,7 @@ authorities_data = [
 
 # Function to create authorities
 def create_authorities():
+    
     for authority_data in authorities_data:
         Authority.objects.create(
             name=authority_data["name"],

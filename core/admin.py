@@ -1,10 +1,26 @@
 from .models import User, Problem, Emergency, AI_Emergency, AI_Problem, Authority, Authority_Locations
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
-class UserAdmin(admin.ModelAdmin):
+class UserAdminCustom(UserAdmin):
     list_display = ('email', 'username', 'is_admin', 'date_of_birth', 'phone_number', 'governorate', 'markaz')
     search_fields = ('email', 'username', 'first_name', 'phone_number')
     list_filter = ('is_admin',)
+    fieldsets = list(UserAdmin.fieldsets)   
+    fieldsets[1][1]["fields"] = [
+        "first_name",
+        "last_name",
+        "phone_number",
+      
+        "email",
+        "image",
+        "governorate",
+        "markaz",
+        
+
+
+    ]
+
 
 
 # -----------------------------
@@ -33,7 +49,7 @@ class AI_EmergencyAdmin(admin.ModelAdmin):
     list_filter = ('danger_level', 'authority_name')
 
 # Registering models in Django admin
-admin.site.register(User, UserAdmin)
+admin.site.register(User, UserAdminCustom)
 
 admin.site.register(Problem)
 admin.site.register(AI_Problem, AI_ProblemAdmin)
@@ -43,4 +59,5 @@ admin.site.register(Authority_Locations)
 
 admin.site.register(Emergency, EmergencyAdmin)
 admin.site.register(AI_Emergency, AI_EmergencyAdmin)
+
 

@@ -1,2 +1,4 @@
 django
 djangorestframework
+langchain_google_genai
+langchain

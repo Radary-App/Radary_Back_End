@@ -1,220 +1,143 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
+
 from django.urls import reverse
-from core.models import User 
+from rest_framework import status
+from rest_framework.test import APITestCase
+from core.models import User, Problem, Emergency, Token
+from django.utils.crypto import get_random_string
+from django.core.files.uploadedfile import SimpleUploadedFile
+import random
 
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
+# for the image only
+from io import BytesIO
+from PIL import Image
 
-class SignUpViewTest(APITestCase):
+
+def create_image_file():
+    # Create an in-memory image
+    image = Image.new('RGB', (100, 100), color='red')  # Create a simple red image
+    image_file = BytesIO()
+    image.save(image_file, format='PNG')  # Save as PNG
+    image_file.seek(0)  # Go to the beginning of the file
+    return SimpleUploadedFile("test_image.png", image_file.read(), content_type="image/png")
+
+def generate_unique_phone_number(existing_numbers):
+    while True:
+        # Generate a random phone number (adjust format as needed)
+        phone_number = f"+201{random.randint(100000000, 999999999)}"
+        if phone_number not in existing_numbers:
+            existing_numbers.add(phone_number)
+            return phone_number
+
+
+
+class TestAPI(APITestCase):
+    existing_phone_numbers = set()
+
 
     def setUp(self):
-        # This method is used to set up any pre-test conditions if needed
-        self.url = reverse('signup')  # Replace 'signup' with the actual URL name for the SignUpView
-
-    def test_signup_success(self):
-        # Define the test data for a successful signup
-        test_data = {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'password': 'strongpassword',
-            'email': 'johndoe@example.com',
-            'phone_number': '1234567890',
-            'date_of_birth': '1990-01-01',
-            'governorate': 'Cairo',
-            'markaz': 'Nasr City'
+        self.unique_phone_number = generate_unique_phone_number(self.existing_phone_numbers)
+        self.user = User.objects.create_user(
+            phone_number=self.unique_phone_number,
+            password="testpass123",
+            email="user@example.com",
+            username="testuser",
+            first_name="test",
+            last_name="test",
+        )
+        self.token, created = Token.objects.get_or_create(user=self.user)
+        self.auth_headers = {"HTTP_AUTHORIZATION": f"Token {self.token.token}"}
+    def test_signup(self):
+        url = reverse('signup')
+        data = {
+            "phone_number":    generate_unique_phone_number(self.existing_phone_numbers),
+            "password": "testpass123",
+            "email": "testuser@example.com",
+            "username":"testuser",
+            "first_name":"test",
+            "last_name":"test",
         }
-
-        # Perform the POST request
-        response = self.client.post(self.url, test_data, format='json')
-
-        # Check if the response status code is 201 (created)
+        response = self.client.post(url, data, format='json')
+      
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['message'], 'User created successfully')
 
-        # Check if the user was created in the database
-        user = User.objects.filter(email='johndoe@example.com').exists()
-        self.assertTrue(user)
 
-    def test_signup_invalid_data(self):
-        # Define invalid test data (missing required fields, etc.)
-        invalid_data = {
-            'first_name': '',  # Invalid data
-            'last_name': 'Doe',
-            'password': 'password',
-            'email': '',  # Missing email
+    def test_login(self):
+        url = reverse('login')
+        data = {
+            "phone_number": self.unique_phone_number,  # Use the generated unique phone number
+            "password": "testpass123",
         }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('token', response.data)
 
-        # Perform the POST request
-        response = self.client.post(self.url, invalid_data, format='json')
-
-        # Check if the response status code is 400 (bad request)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('email', response.data)  # Check that email validation failed
-
-
-class AuthenticatedViewTestCase(TestCase):
-    def setUp(self):
-        # Initialize the test client
-        self.client = Client()
-
-    def test_authenticated_post_request(self):
-        # Log in the user
-        self.client.login(phone_number='12345678902', password='strongpassword')
-        
-        # Define the URL and POST data
-        url = '/problem/create/'
-        post_data = {
-            'field1': 'value1',
-            'field2': 'value2',
-            # Add other fields as needed
+    def test_create_problem(self):
+        url = reverse('create_problem')
+       
+        photo =  create_image_file()
+        data = {
+            "coordinates": "40.748817,-73.985428",
+            "photo": photo,  # Replace with a valid path or mock
+            "user_description": "Test Problem Description"
         }
-        
-        # Make the POST request
-        response = self.client.post(url, data=post_data, content_type='application/json')
-        
-        # Assert the response status code
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # Or another expected status code
-        
-        # Optionally, you can assert the response content
-        # self.assertEqual(response.json(), {'expected': 'response'})
+        response = self.client.post(url, data, format='multipart', **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_problem_list(self):
+        url = reverse('browse_problems')
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_create_emergency(self):
+        url = reverse('create_emergency')
+        photo =  create_image_file()
+
+        data = {
+            "coordinates": "40.748817,-73.985428",  # Make sure this matches the expected format
+            "photo": photo,  # Use a valid path or mock if required
+            "description": "Test Emergency"
+        }
+        response = self.client.post(url, data, format='multipart', **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+       
 
 
+    def test_emergency_list(self):
+        url = reverse('browse_emergencies')
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_create_review(self):
+        problem = Problem.objects.create(
+        user=self.user,
+        coordinates="40.748817,-73.985428",
+        user_description="Test Problem Description",
+        photo=None  # Set this to a valid photo or mock
+    )
+        url = reverse('problem_review', args=[problem.id])
+        data = {
+            "rating": 5,
+            "comment": "Great work!"
+        }
+        response = self.client.post(url, data, format='json', **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_update_profile(self):
+        url = reverse('profile')
+        data = {
+            "email": "newemail@example.com"
+        }
+        response = self.client.put(url, data, format='json', **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], "Profile updated successfully")
 
+    def test_paginated_problem_list(self):
+        url = reverse('browse_problems', args=[1])
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_paginated_emergency_list(self):
+        url = reverse('browse_emergencies', args=[1])
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from django.test import TestCase
-# from django.contrib.auth import get_user_model
-# from .models import Report, AI, Token
-# from rest_framework.test import APIClient
-# from rest_framework.utils import json
-# from django.utils.crypto import get_random_string
-# User = get_user_model()
-
-# class UserModelTest(TestCase):
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             email='test@example.com', 
-#             username='testuser', 
-#             password='password123'
-#         )
-
-#     def test_user_creation(self):
-#         self.assertEqual(self.user.username, 'testuser')
-#         self.assertTrue(self.user.check_password('password123'))
-
-# class ReportModelTest(TestCase):
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             email='test@example.com', 
-#             username='testuser', 
-#             password='password123'
-#         )
-#         self.issue = Report.objects.create(
-#             title='Test Issue',
-#             description='This is a test issue',
-#             address='Test Address',
-#             level='medium',
-#             user=self.user
-#         )
-
-#     def test_issue_creation(self):
-#         self.assertEqual(self.issue.title, 'Test Issue')
-#         self.assertEqual(self.issue.level, 'medium')
-
-# class AIModelTest(TestCase):
-
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             email='test@example.com', 
-#             username='testuser', 
-#             password='password123'
-#         )
-#         self.issue = Report.objects.create(
-#             title='Test Issue',
-#             description='This is a test issue',
-#             address='Test Address',
-#             level='medium',
-#             user=self.user
-#         )
-#         self.ai = AI.objects.create(
-#             issue=self.issue,
-#             ai_description='AI generated description',
-#             ai_solution='AI generated solution',
-#             ai_danger_level='medium'
-#         )
-
-#     def test_ai_creation(self):
-#         self.assertEqual(self.ai.ai_description, 'AI generated description')
-#         self.assertEqual(self.ai.ai_solution, 'AI generated solution')
-
-
-# class ReportListViewTest(TestCase):
-
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             email='test@example.com', 
-#             username='testuser', 
-#             password='password123'
-#         )
-
-#         self.token = get_random_string(255)
-#         Token.objects.create(user=self.user, token=self.token)
-
-#         self.client = APIClient()
-#         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
-
-#     def test_issue_list_view(self):
-
-#         Report.objects.create(title='Test Report', address='Test Address', level='low', user=self.user)
-#         response = self.client.get('/reports/')
-#         response_data = response.json()
-        
-#         # Debugging: Print response details
-#         print('Status Code:', response.status_code)
-#         print('Response Data:', response_data)
-        
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Test Report', [item['title'] for item in response_data])

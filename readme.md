@@ -66,27 +66,42 @@ Stores AI-generated content related to issues:
 1. **Clone the repository**
    ```bash
    git clone https://github.com/Radary-App/Back_End.git
-   cd Back_End
+   cd Back_End 
+   ```
 
-
-
-
-2. **Install Dependencies**
+2. **Create VE and Install Dependencies**
    ```bash
+   python -m venv .venv
+   cd venv/Scripts
+   activate
+   cd ../..
    pip install -r requirements.txt
-
+      ```
 2. **Apply migrations** 
    ```bash
+   python manage.py makemigrations
    python manage.py migrate
-
+   ```
 3. **Run the development server** 
    ```bash
    python manage.py runserver
-
+   ```
 4. **Test the API**
    ```bash
-    python manage.py test
+    python manage.py test core
    ```
 
+### API Endpoints
+- `POST /signup`: Register a new user.
+- `POST /login`: Authenticate a user and retrieve a token.
+- `POST /create_problem`: Submit a problem report.
+- `GET /browse_problems`: Retrieve a list of problems.
+- `POST /create_emergency`: Submit an emergency report.
+- `GET /browse_emergencies`: Retrieve a list of emergencies.
+- `POST /problem_review/{id}`: Submit a review for a specific problem.
+- `PUT /profile`: Update user profile information.
+
+## Running Tests
+To run the test suite, use:
 # License
 This project is licensed under the MIT License.

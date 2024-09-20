@@ -1,20 +1,44 @@
 from django.urls import path
-from .views import SignUpView, LoginView, CreateProblemView, ProblemListView, CreateEmergencyView, EmergencyListView, CreateReviewView, Create911View#, ProfileListView, ProfileUpdateView, ProfileDeleteView
+from .views import (
+    SignUpView,
+      LoginView,
+        CreateProblemView, ProblemListView,
+          CreateEmergencyView,
+            EmergencyListView,
+              CreateReviewView,
+                Create911View,
+                    UpdateUserView,
+                
+                    PaginatedProblemListView,
+                      PaginatedEmergencyListView,
+                      )
 
 urlpatterns = [
+    # login signup
     path('signup/', SignUpView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
 
-    path('problem/create/', CreateProblemView.as_view(), name='create_problem'),
-    path('problem/all/', ProblemListView.as_view(), name='browse_problems'),
-    path('problem/<int:problem_id>/review/', CreateReviewView.as_view(), name='problem_review'),
+    # list views general 
+    path('problem/<int:page_number>/', PaginatedProblemListView.as_view(), name='browse_problems'),
+    path('emergency/<int:page_number>/', PaginatedEmergencyListView.as_view(), name='browse_emergencies'),
+    path("problem/" , PaginatedProblemListView.as_view(), name="browse_problems"),
+    path("emergency/" , PaginatedEmergencyListView.as_view(), name="browse_emergencies"),
 
-    path('emergency/create/', CreateEmergencyView.as_view(), name='create_emergency'),
+    # list views profile
+    path('problem/all/', ProblemListView.as_view(), name='browse_problems'),
     path('emergency/all/', EmergencyListView.as_view(), name='browse_emergencies'),
 
-    path('911/', Create911View.as_view(), name='911_report'),
+    # create views
+    path('problem/create/', CreateProblemView.as_view(), name='create_problem'),
+    path('emergency/create/', CreateEmergencyView.as_view(), name='create_emergency'),
 
-    # path('profile/', ProfileListView.as_view(), name='profile_details'),
-    # path('profile/update/', ProfileUpdateView.as_view(), name='update_profile'),
-    # path('profile/delete/', ProfileDeleteView.as_view(), name='delete_profile'),
+    
+    # reviews
+    path('problem/<int:problem_id>/review/', CreateReviewView.as_view(), name='problem_review'),
+
+
+    #anonymous Emergency 
+    path('911/', Create911View.as_view(), name='911_report'),
+    path("profile/update/", UpdateUserView.as_view(), name="profile"),
+    # update profile
 ]
