@@ -10,15 +10,19 @@ import random
 # for the image only
 from io import BytesIO
 from PIL import Image
-
+import os 
+from django.conf import settings
 
 def create_image_file():
-    # Create an in-memory image
-    image = Image.new('RGB', (100, 100), color='red')  # Create a simple red image
-    image_file = BytesIO()
-    image.save(image_file, format='PNG')  # Save as PNG
-    image_file.seek(0)  # Go to the beginning of the file
-    return SimpleUploadedFile("test_image.png", image_file.read(), content_type="image/png")
+    
+            image = Image.new('RGB', (100, 100), color='red')  # Create a simple red image
+            image_file = BytesIO()
+            image.save(image_file
+            , format='PNG')  # Save as PNG
+            image_file.seek(0)  # Go to the beginning of the file
+    
+    
+            return SimpleUploadedFile("test_image.png", image_file.read(), content_type="image/png")
 
 def generate_unique_phone_number(existing_numbers):
     while True:
@@ -141,3 +145,13 @@ class TestAPI(APITestCase):
         response = self.client.get(url, **self.auth_headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def tearDown(self):
+        # Delete the test image file if it exists
+        test_image_path  = os.path.join(settings.MEDIA_ROOT, "problem_photos", 'test_image.png')
+        test_image_path_2= os.path.join(settings.MEDIA_ROOT, "emergency_photos", 'test_image.png')
+
+        if os.path.isfile(test_image_path):
+
+            os.remove(test_image_path)
+        if os.path.isfile(test_image_path_2):
+            os.remove(test_image_path_2)

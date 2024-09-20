@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 import datetime
+import os
 
 # Custom User model
 class User(AbstractUser):
@@ -51,7 +52,12 @@ class Problem(models.Model):
     
     def __str__(self):
         return f"Report by {self.user.username} on {self.created_at} with status {self.status}"
-
+    def delete(self, *args, **kwargs):
+        # Delete the photo from the file system
+        if self.photo:
+            if os.path.isfile(self.photo.path):
+                os.remove(self.photo.path)
+        super().delete(*args, **kwargs)
 
 class Emergency(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -60,6 +66,12 @@ class Emergency(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+    def delete(self, *args, **kwargs):
+       
+        if self.photo:
+            if os.path.isfile(self.photo.path):
+                os.remove(self.photo.path)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"Emergency by {self.user.username} on {self.created_at}"
