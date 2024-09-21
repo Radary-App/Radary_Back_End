@@ -200,3 +200,32 @@ class UpdateUserView(APIView):
             return Response({"message": "Profile updated successfully", "data": serializer.data}, status=status.HTTP_200_OK)
        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,req):
+
+        user = req.user
+
+ 
+        serializerEmergency = EmergencySerializer(user.emergency_set.all(), many=True)  
+        serializerProblem = ProblemSerializer(user.problem_set.all(), many=True)
+
+
+        return Response({"emergency": serializerEmergency.data, "problem": serializerProblem.data}, status=status.HTTP_200_OK)
+    
+
+
+
+class ProfilePersonalDataView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,req):
+        user = req.user 
+        serializerUser = UserSerializer(user)   
+        return Response({"user": serializerUser.data}, status=status.HTTP_200_OK)

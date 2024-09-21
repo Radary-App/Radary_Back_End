@@ -8,7 +8,8 @@ from .views import (
               CreateReviewView,
                 Create911View,
                     UpdateUserView,
-                
+                    ProfileView,
+                    ProfilePersonalDataView,
                     PaginatedProblemListView,
                       PaginatedEmergencyListView,
                       )
@@ -27,6 +28,8 @@ urlpatterns = [
     # list views profile
     path('problem/all/', ProblemListView.as_view(), name='browse_problems'),
     path('emergency/all/', EmergencyListView.as_view(), name='browse_emergencies'),
+    path('profile/all/', ProfileView.as_view(), name='profile'),  
+    path('profile/', ProfilePersonalDataView.as_view(), name='profilePersonal'),  
 
     # create views
     path('problem/create/', CreateProblemView.as_view(), name='create_problem'),

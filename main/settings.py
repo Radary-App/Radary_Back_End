@@ -6,9 +6,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-)qf+!_*738a#v4ugo+k42ctwah+$qxm*&rvpamrq&(cf#a=_ci'
 
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS =  ["bettercallguts.pythonanywhere.com", "pythonanywhere", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS =  [
+
+"*"]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -33,7 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
