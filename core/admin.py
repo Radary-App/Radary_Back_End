@@ -1,4 +1,4 @@
-from .models import User, Problem, Emergency, AI_Emergency, AI_Problem, Authority, Authority_Locations, Review
+from .models import User,Review, Problem, Emergency, AI_Emergency, AI_Problem, Authority, Authority_Locations
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -16,14 +16,9 @@ class UserAdminCustom(UserAdmin):
         "image",
         "governorate",
         "markaz",
-        
-
-
     ]
 
-
-
-# -----------------------------
+# ---------------------------
 # Customizing Report admin view
 class ProblmAdmin(admin.ModelAdmin):
     list_display = ('status', 'user', 'user_description',  'coordinates')
@@ -48,10 +43,6 @@ class AI_EmergencyAdmin(admin.ModelAdmin):
     search_fields = ('description', 'danger_level')
     list_filter = ('danger_level', 'authority_name')
 
-
-class ReviewModelAdmin(admin.ModelAdmin):
-    pass
-
 # Registering models in Django admin
 admin.site.register(User, UserAdminCustom)
 
@@ -64,4 +55,4 @@ admin.site.register(Authority_Locations)
 admin.site.register(Emergency, EmergencyAdmin)
 admin.site.register(AI_Emergency, AI_EmergencyAdmin)
 
-admin.site.register(Review, ReviewModelAdmin)
+

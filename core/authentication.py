@@ -1,3 +1,20 @@
+"""
+This module provides custom authentication classes for the Radary application.
+Classes:
+    TokenAuthentication(BaseAuthentication):
+        Custom authentication class that authenticates users based on a token provided in the request headers.
+        Methods:
+            authenticate(request):
+                Authenticates the user based on the 'Authorization' header in the request.
+                Returns a tuple of (user, token) if authentication is successful, otherwise raises AuthenticationFailed.
+    PhoneNumberBackend(ModelBackend):
+        Custom authentication backend that allows users to authenticate using their phone number and password.
+        Methods:
+            authenticate(request, phone_number=None, password=None, **kwargs):
+                Authenticates the user based on the provided phone number and password.
+                Returns the user if authentication is successful, otherwise returns None.
+"""
+
 from.models import Token, User
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed

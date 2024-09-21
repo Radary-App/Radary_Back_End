@@ -1,5 +1,8 @@
 
-import analyser, summarizer, translator
+# import analyser, summarizer, translator
+from .analyser import analyser
+from .summarizer import summarize
+from .translator import translate as translator
 
 def analyse_accident(image_data):
     retries = 0
@@ -37,8 +40,8 @@ def analyse_isuue(image_data):
     return description, title, authority, priority 
 
 def summarize(feedbacks):
-    summary = summarizer.summarize(feedbacks)
+    summary = summarize(feedbacks)
     return summary
 
 def translate(text, lang= "Arabic"):
-    translator.translate(text, lang)
+    return translator(text, lang)

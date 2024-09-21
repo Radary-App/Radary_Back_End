@@ -54,20 +54,36 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 # Problem Serializer
+
+def get_img_data_(IMG_PATH):
+    uni_path = "media/" + str(IMG_PATH)
+    with open(str(uni_path), "rb") as image_file:
+        image_data = image_file.read()
+    image_data_b64 = base64.b64encode(image_data).decode("utf-8")
+    return image_data_b64
+
 class ProblemSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(required=False, read_only=True)
-    id = serializers.IntegerField(required=False, read_only=True)
+    ai_description = serializers.SerializerMethodField()
+
     class Meta:
         model = Problem
         fields = [
             'coordinates',
-              "status",
-                'user_description',
-                  'photo', 
-                    "created_at",
-                      'status',
-                        'id',
-                        ]
+            'status',
+            'user_description',
+            'photo', 
+            'created_at',
+            'status',
+            'id',
+            'ai_description',  # Add the AI description field
+        ]
+
+    def get_ai_description(self, obj):
+        try:
+            ai_problem = AI_Problem.objects.get(report=obj)
+            return ai_problem.description  # Return the description from AI_Problem
+        except AI_Problem.DoesNotExist:
+            return None
 
     def validate(self, data):
         coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
@@ -84,38 +100,21 @@ class ProblemSerializer(serializers.ModelSerializer):
             photo=validated_data['photo'],
             user_description=validated_data['user_description'] if 'user_description' in validated_data else None
         )
-        
-        image = get_img_data_(problem.photo)
-        try:
-
-            description, authority, priority = analyser.analyse_isuue(image)
-            authority_name = 'City_council'
-            subdivision = authority
-            authority_object = Authority.objects.get(name=authority_name)
-            ai_problem = AI_Problem.objects.create(
-                report=problem,
-                description=description,
-                authority_name=authority_object,
-                priority=priority,
-                subdivision=subdivision if 'subdivision' in locals() else None,
-            )
-        except Exception as e:
-            # logger.error("An error occurred: %s", e)
-            pass
         return problem
 
-def get_img_data_(IMG_PATH):
-    uni_path = "media/" + str(IMG_PATH)
-    with open(str(uni_path), "rb") as image_file:
-        image_data = image_file.read()
-    image_data_b64 = base64.b64encode(image_data).decode("utf-8")
-    return image_data_b64
-
 class EmergencySerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required=False, read_only=True)
+    ai_description = serializers.SerializerMethodField()
+
     class Meta:
         model = Emergency
-        fields = ['coordinates', 'photo', 'id']
+        fields = ['coordinates', 'photo', 'id', 'ai_description']  # Add AI description field
+
+    def get_ai_description(self, obj):
+        try:
+            ai_emergency = AI_Emergency.objects.get(report=obj)
+            return ai_emergency.description  # Return the description from AI_Emergency
+        except AI_Emergency.DoesNotExist:
+            return None
 
     def validate(self, data):
         coordinates_pattern = r'^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$'
@@ -131,27 +130,7 @@ class EmergencySerializer(serializers.ModelSerializer):
             coordinates=validated_data['coordinates'],
             photo=validated_data['photo'],
         )
-
-      
-        image = get_img_data_(emergency.photo)
-        try:
-            description, authority, level = analyser.analyse_accident(image)
-            if authority not in ['Fire_station', 'Hospital']:
-                authority = 'Police'
-            authority_object = Authority.objects.get(name=authority)
-
-            ai_emergency = AI_Emergency.objects.create(
-                report=emergency,
-                description=description,
-                authority_name=authority_object,
-                danger_level=level,
-            )
-        except Exception as e:
-            pass
-            # logger.error()
         return emergency
-
-
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
@@ -192,7 +171,7 @@ class NOOSerializer(serializers.ModelSerializer):
                     password='12345678',
                     first_name = 'Emergency',
                     last_name = 'User',
-                    phone_number = '123-456-7890',
+                    phone_number = '111111111111',
                     date_of_birth = datetime.date(year=2000, month=1, day=1)
                 )
             user.save()
