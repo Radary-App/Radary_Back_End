@@ -64,6 +64,7 @@ class ProblemSerializer(serializers.ModelSerializer):
             'id',
             'ai_description_english',
             'ai_description_arabic',
+            'title',
         ]
 
     def get_ai_description_english(self, obj):
@@ -78,6 +79,13 @@ class ProblemSerializer(serializers.ModelSerializer):
             ai_problem = AI_Problem.objects.get(report=obj)
             arabic_description = AI_Engine.translate(ai_problem.description)
             return arabic_description
+        except AI_Problem.DoesNotExist:
+            return None
+
+    def get_title(self, obj):
+        try:
+            ai_problem = AI_Problem.objects.get(report=obj)
+            return ai_problem.title
         except AI_Problem.DoesNotExist:
             return None
 
@@ -101,9 +109,10 @@ class ProblemSerializer(serializers.ModelSerializer):
 class EmergencySerializer(serializers.ModelSerializer):
     ai_description_english = serializers.SerializerMethodField()
     ai_description_arabic = serializers.SerializerMethodField()
+    title = serializers.CharField(max_length=255, required=False, read_only=True)
     class Meta:
         model = Emergency
-        fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic']
+        fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic', 'title']
 
     def get_ai_description_arabic(self, obj):
         try:
@@ -117,6 +126,13 @@ class EmergencySerializer(serializers.ModelSerializer):
             ai_emergency = AI_Emergency.objects.get(report=obj)
             arabic_description = AI_Engine.translate(ai_emergency.description)
             return arabic_description
+        except AI_Emergency.DoesNotExist:
+            return None
+
+    def get_title(self, obj):
+        try:
+            ai_emergency = AI_Emergency.objects.get(report=obj)
+            return ai_emergency.title
         except AI_Emergency.DoesNotExist:
             return None
 
