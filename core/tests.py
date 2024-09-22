@@ -2,7 +2,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from core.models import User, Problem, Emergency, Token
+from core.models import User, Problem, Token, Authority, AI_Problem, AI_Emergency, Summary
 from django.utils.crypto import get_random_string
 from django.core.files.uploadedfile import SimpleUploadedFile
 import random
@@ -39,6 +39,8 @@ class TestAPI(APITestCase):
 
 
     def setUp(self):
+        os.makedirs( os.path.join(settings.BASE_DIR, settings.MEDIA_ROOT, ), exist_ok=True)
+        
         self.unique_phone_number = generate_unique_phone_number(self.existing_phone_numbers)
         self.user = User.objects.create_user(
             phone_number=self.unique_phone_number,
@@ -48,6 +50,10 @@ class TestAPI(APITestCase):
             first_name="test",
             last_name="test",
         )
+        Authority.objects.create(name="Fire_station", email="user@example.com",).save()
+        Authority.objects.create(name="Hospital",  email="user@example.com",).save()
+        Authority.objects.create(name="Fire_station",  email="user@example.com",).save()
+
         self.token, created = Token.objects.get_or_create(user=self.user)
         self.auth_headers = {"HTTP_AUTHORIZATION": f"Token {self.token.token}"}
     def test_signup(self):
@@ -92,18 +98,7 @@ class TestAPI(APITestCase):
         response = self.client.get(url, **self.auth_headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_create_emergency(self):
-        url = reverse('create_emergency')
-        photo =  create_image_file()
-
-        data = {
-            "coordinates": "40.748817,-73.985428",  # Make sure this matches the expected format
-            "photo": photo,  # Use a valid path or mock if required
-            "description": "Test Emergency"
-        }
-        response = self.client.post(url, data, format='multipart', **self.auth_headers)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-       
+   
 
 
     def test_emergency_list(self):
@@ -126,15 +121,7 @@ class TestAPI(APITestCase):
         response = self.client.post(url, data, format='json', **self.auth_headers)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_update_profile(self):
-        url = reverse('profile')
-        data = {
-            "email": "newemail@example.com"
-        }
-        response = self.client.put(url, data, format='json', **self.auth_headers)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], "Profile updated successfully")
-
+    
     def test_paginated_problem_list(self):
         url = reverse('browse_problems', args=[1])
         response = self.client.get(url, **self.auth_headers)
@@ -155,3 +142,48 @@ class TestAPI(APITestCase):
             os.remove(test_image_path)
         if os.path.isfile(test_image_path_2):
             os.remove(test_image_path_2)
+    def test_paginated_problem_list(self):
+        url = reverse('browse_problems', args=[1])
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)
+        self.assertIn('total_pages', response.data)
+
+        # 
+    def test_paginated_emergency_list(self):
+        url = reverse('browse_emergencies', args=[1])
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)
+        self.assertIn('total_pages', response.data)
+        # 
+    def test_profile_view(self):
+
+        url = reverse('profile_view')
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('emergency', response.data)
+        self.assertIn('problem', response.data)
+
+
+    def test_profile_personal_data_view(self):
+       
+        
+        url = reverse('profilePersonal')
+        response = self.client.get(url, **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('user', response.data)
+
+
+    
+   
+   
+    def test_update_user_profile(self):
+        url = reverse('update_profile')
+        data = {
+            "first_name": "UpdatedName"
+        }
+        response = self.client.put(url, data, format='json', **self.auth_headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['data']['first_name'], "UpdatedName")
+

@@ -99,7 +99,7 @@ def emergencies_ai_reports(sender, instance, created, **kwargs):
         process_emergencies_with_ai(instance.id)
 
 def process_emergencies_with_ai(emergency_ids):
-    emergencies = Emergency.objects.filter(id__in=emergency_ids)
+    emergencies = Emergency.objects.filter(id__in=[emergency_ids])
 
     for emergency in emergencies:
         image = get_img_data_(emergency.photo)
