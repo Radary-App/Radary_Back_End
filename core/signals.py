@@ -108,7 +108,7 @@ def process_emergencies_with_ai(emergency_ids):
             authority = 'Police'
 
         authority_object = Authority.objects.get(name=authority)
-        ai_emergency = AI_Emergency.objects(
+        ai_emergency = AI_Emergency.objects.create(
                 report=emergency,
                 description=description,
                 title=title,

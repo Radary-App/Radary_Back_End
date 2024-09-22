@@ -110,7 +110,7 @@ class ProblemSerializer(serializers.ModelSerializer):
 class EmergencySerializer(serializers.ModelSerializer):
     ai_description_english = serializers.SerializerMethodField()
     ai_description_arabic = serializers.SerializerMethodField()
-    title = serializers.CharField(max_length=255, required=False, read_only=True)
+    title = serializers.SerializerMethodField()
     class Meta:
         model = Emergency
         fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic', 'title']
@@ -149,7 +149,7 @@ class EmergencySerializer(serializers.ModelSerializer):
         emergency = Emergency.objects.create(
             user=validated_data['user'],
             coordinates=validated_data['coordinates'],
-            # photo=validated_data['photo'],
+            photo=validated_data['photo'],
         )
         return emergency
 
