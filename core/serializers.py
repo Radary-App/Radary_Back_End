@@ -1,12 +1,9 @@
 from rest_framework import serializers
-from .models import User, Problem, Emergency, Review, AI_Problem, AI_Emergency, Authority
-import random, re
-from Radary_AI import analyser
+from .models import User, Problem, Emergency, Review, AI_Problem, AI_Emergency
+import random, re, logging
+from Radary_AI import main as AI_Engine
 from datetime import datetime
-import base64
-import logging
 logger = logging.getLogger('core')
-
 
 
 
@@ -22,11 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         phone_number = data.get('phone_number', None)
         if phone_number is not None:
-            
             cleaned_phone_number = ''.join(filter(str.isdigit, phone_number))
-         
-
-            # Check if the length is between 11 and 13
             if len(cleaned_phone_number) < 10 or len(cleaned_phone_number) > 14:
                 raise serializers.ValidationError({
                     'phone_number': "Phone number must be between 11 and 14 digits."
@@ -53,18 +46,12 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
+
+
 # Problem Serializer
-
-def get_img_data_(IMG_PATH):
-    uni_path = "media/" + str(IMG_PATH)
-    with open(str(uni_path), "rb") as image_file:
-        image_data = image_file.read()
-    image_data_b64 = base64.b64encode(image_data).decode("utf-8")
-    return image_data_b64
-
 class ProblemSerializer(serializers.ModelSerializer):
-    ai_description = serializers.SerializerMethodField()
-
+    ai_description_english = serializers.SerializerMethodField()
+    ai_description_arabic = serializers.SerializerMethodField()
     class Meta:
         model = Problem
         fields = [
@@ -75,13 +62,22 @@ class ProblemSerializer(serializers.ModelSerializer):
             'created_at',
             'status',
             'id',
-            'ai_description',  # Add the AI description field
+            'ai_description_english',
+            'ai_description_arabic',
         ]
 
-    def get_ai_description(self, obj):
+    def get_ai_description_english(self, obj):
         try:
             ai_problem = AI_Problem.objects.get(report=obj)
-            return ai_problem.description  # Return the description from AI_Problem
+            return ai_problem.description 
+        except AI_Problem.DoesNotExist:
+            return None
+        
+    def get_ai_description_arabic(self, obj):
+        try:
+            ai_problem = AI_Problem.objects.get(report=obj)
+            arabic_description = AI_Engine.translate(ai_problem.description)
+            return arabic_description
         except AI_Problem.DoesNotExist:
             return None
 
@@ -103,16 +99,24 @@ class ProblemSerializer(serializers.ModelSerializer):
         return problem
 
 class EmergencySerializer(serializers.ModelSerializer):
-    ai_description = serializers.SerializerMethodField()
-
+    ai_description_english = serializers.SerializerMethodField()
+    ai_description_arabic = serializers.SerializerMethodField()
     class Meta:
         model = Emergency
-        fields = ['coordinates', 'photo', 'id', 'ai_description']  # Add AI description field
+        fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic']
 
-    def get_ai_description(self, obj):
+    def get_ai_description_arabic(self, obj):
         try:
             ai_emergency = AI_Emergency.objects.get(report=obj)
-            return ai_emergency.description  # Return the description from AI_Emergency
+            return ai_emergency.description
+        except AI_Emergency.DoesNotExist:
+            return None
+
+    def get_ai_description_english(self, obj):
+        try:
+            ai_emergency = AI_Emergency.objects.get(report=obj)
+            arabic_description = AI_Engine.translate(ai_emergency.description)
+            return arabic_description
         except AI_Emergency.DoesNotExist:
             return None
 
@@ -131,6 +135,8 @@ class EmergencySerializer(serializers.ModelSerializer):
             photo=validated_data['photo'],
         )
         return emergency
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
@@ -148,6 +154,8 @@ class ReviewSerializer(serializers.ModelSerializer):
             comment=validated_data['comment'] if 'comment' in validated_data else None
         )
         return review
+    
+
 class NOOSerializer(serializers.ModelSerializer):
     class Meta:
         model = Emergency

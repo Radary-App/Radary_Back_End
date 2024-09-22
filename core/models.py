@@ -2,7 +2,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-import datetime
 import os
 
 # Custom User model
@@ -11,7 +10,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20,
                                     default="000000000000",
-                                     unique=True)
+                                    unique=True)
     password = models.CharField(max_length=255)
 
     email = models.EmailField(null=True, blank=True)
@@ -45,21 +44,23 @@ class Problem(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='face_1')
 
     coordinates = models.CharField(max_length=255)
-    photo = models.ImageField(upload_to='problem_photos/', blank=True, null=True) ## change to required in production
+    photo = models.ImageField(upload_to='problem_photos/')
     user_description = models.CharField(max_length=255, null=True, blank=True)
     
     conclusion = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     
-    def __str__(self):
-        return f"Report by {self.user.username} on {self.created_at} with status {self.status}"
     def delete(self, *args, **kwargs):
-        # Delete the photo from the file system
         if self.photo:
             if os.path.isfile(self.photo.path):
                 os.remove(self.photo.path)
         super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"Report by {self.user.username} on {self.created_at} with status {self.status}"
+
+
 
 class Emergency(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -68,6 +69,7 @@ class Emergency(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+
     def delete(self, *args, **kwargs):
        
         if self.photo:
@@ -77,6 +79,7 @@ class Emergency(models.Model):
 
     def __str__(self):
         return f"Emergency by {self.user.username} on {self.created_at}"
+
 
 class Review(models.Model):
     related_user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -97,7 +100,6 @@ class Authority(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=20, null=True, blank=True)
 
-
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
@@ -113,9 +115,6 @@ class Authority_Locations(models.Model):
 
     def __str__(self):
         return f"Authority: {self.authority.name} in {self.governorate}, {self.markaz}"
-    
-
-# Optional Admin-specific model if needed
 
 
 class AI_Problem(models.Model):
@@ -149,6 +148,4 @@ class Summary(models.Model):
 
     def __str__(self):
         return f"Summary for reports: {self.review_ids}"
-    
-
 

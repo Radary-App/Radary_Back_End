@@ -15,11 +15,11 @@ Classes:
                 Returns the user if authentication is successful, otherwise returns None.
 """
 
-from.models import Token, User
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
+from .models import Token
 
 class TokenAuthentication(BaseAuthentication):
     def authenticate(self, request):

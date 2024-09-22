@@ -28,7 +28,6 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-     
         phone_number = request.data.get('phone_number')
         password = request.data.get('password')
 
@@ -36,10 +35,7 @@ class LoginView(APIView):
             raise Response({'error': 'Phone number and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(phone_number=phone_number, password=password)
-        
         if user is not None:
-        
-            # Generate a new token
             token = get_random_string(255)
             Token.objects.update_or_create(user=user, defaults={'token': token})
             return Response({'token': token}, status=status.HTTP_200_OK)
@@ -48,10 +44,8 @@ class LoginView(APIView):
 class CreateProblemView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    # permission_classes = [AllowAny]
 
-    def post(self, request):
-    
+    def post(self, request):    
         user = request.user
         serializer = ProblemSerializer(data=request.data)
         if serializer.is_valid():
@@ -75,7 +69,6 @@ class CreateEmergencyView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        
         user = request.user
         serializer = EmergencySerializer(data=request.data)
         if serializer.is_valid():
@@ -125,18 +118,11 @@ class Create911View(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        
         serializer = NOOSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(report=request.data.get('report'))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
 
 
 class PaginatedProblemListView(APIView):
@@ -146,7 +132,7 @@ class PaginatedProblemListView(APIView):
     def get(self, request, page_number=1):
         """Get paginated list of problems"""
         problems = Problem.objects.all().order_by('-created_at')
-        paginator = Paginator(problems, 20)  # 20 problems per page
+        paginator = Paginator(problems, 20)
 
         try:
             page = paginator.page(page_number)
@@ -170,7 +156,7 @@ class PaginatedEmergencyListView(APIView):
     def get(self, request, page_number=1):
         """Get paginated list of emergencies"""
         emergencies = Emergency.objects.all().order_by('-created_at')
-        paginator = Paginator(emergencies, 20)  # 20 emergencies per page
+        paginator = Paginator(emergencies, 20)
 
         try:
             page = paginator.page(page_number)
@@ -194,7 +180,7 @@ class UpdateUserView(APIView):
     def put(self, request):
         user = request.user
        
-        serializer = UserSerializer(user, data=request.data, partial=True)  # `partial=True` allows partial updates
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Profile updated successfully", "data": serializer.data}, status=status.HTTP_200_OK)
@@ -208,13 +194,9 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,req):
-
         user = req.user
-
- 
         serializerEmergency = EmergencySerializer(user.emergency_set.all(), many=True)  
         serializerProblem = ProblemSerializer(user.problem_set.all(), many=True)
-
 
         return Response({"emergency": serializerEmergency.data, "problem": serializerProblem.data}, status=status.HTTP_200_OK)
     

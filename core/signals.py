@@ -1,11 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.cache import cache
+from django.conf import settings
 from .models import Review, Summary, Problem, AI_Problem, Authority, Emergency, AI_Emergency
 from Radary_AI import main as AI_Engine
-import base64
-from django.conf import settings
-import os
+import os, base64
 
 BASE_DIR  = settings.BASE_DIR
 BASE_DIR_MEDIA = os.path.join(BASE_DIR, 'media')
@@ -55,15 +54,23 @@ def track_problems(sender, instance, created, **kwargs):
         cache.set('problem_count', problem_count)
         cache.set('problem_ids', problem_ids)
 
-        # Check if count reached 10
-        if problem_count >= 10:
+        # Check if count reached 20
+        if problem_count >= 20:
             process_problems_with_ai(problem_ids)
             # Reset cache
             cache.set('problem_count', 0)
             cache.set('problem_ids', [])
 
+# Helper function to read image data from a file and encode it in base64 format
+def get_img_data_(IMG_PATH):
+    uni_path = os.path.join(BASE_DIR, 'media' , str(IMG_PATH))
+    with open(str(uni_path), "rb") as image_file:
+        image_data = image_file.read()
+    image_data_b64 = base64.b64encode(image_data).decode("utf-8")
+    return image_data_b64
+
 def process_problems_with_ai(problem_ids):
-    # Fetch the 10 problems from the database
+    # Fetch the 20 problems from the database
     problems = Problem.objects.filter(id__in=problem_ids)
 
     for problem in problems:
@@ -84,15 +91,6 @@ def process_problems_with_ai(problem_ids):
         )
 
 
-# Helper function to read image data from a file and encode it in base64 format
-def get_img_data_(IMG_PATH):
-    uni_path = os.path.join(BASE_DIR, 'media' , str(IMG_PATH))
-    with open(str(uni_path), "rb") as image_file:
-        image_data = image_file.read()
-    image_data_b64 = base64.b64encode(image_data).decode("utf-8")
-    return image_data_b64
-
-
 #-------------------------------------------------------------
 # Generation of AI Reports for EMERGENCIES
 @receiver(post_save, sender=Emergency)
@@ -104,7 +102,6 @@ def process_emergencies_with_ai(emergency_ids):
     emergencies = Emergency.objects.filter(id__in=emergency_ids)
 
     for emergency in emergencies:
-        UNI_PATH =  os.path.join(BASE_DIR, 'media' , str(emergency.photo))
         image = get_img_data_(emergency.photo)
         description, title, authority, level = AI_Engine.analyse_accident(image)
         if authority not in ['Fire_station', 'Hospital']:
