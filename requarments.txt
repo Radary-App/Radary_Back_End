@@ -1,6 +1,0 @@
-django
-djangorestframework
-langchain_google_genai
-langchain
-django-jazzmin
-whitenoise

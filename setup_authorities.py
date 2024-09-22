@@ -4,10 +4,9 @@ from django.utils import timezone
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')  # Replace 'your_project_name'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-# Data for the four authorities
 authorities_data = [
     {"name": "Police", "email": "police@radary.com", "phone_number": "123456789"},
     {"name": "Fire_station", "email": "fire_station@radary.com", "phone_number": "987654321"},
@@ -15,7 +14,6 @@ authorities_data = [
     {"name": "City_council", "email": "city_council@radary.com", "phone_number": "556677889"},
 ]
 
-# Function to create authorities
 def create_authorities():
     
     for authority_data in authorities_data:
