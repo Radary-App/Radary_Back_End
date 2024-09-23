@@ -23,6 +23,7 @@ urlpatterns = [
     # list views per profile
     path('problem/all/', ProblemListView.as_view(), name='browse_problems'),
     path('emergency/all/', EmergencyListView.as_view(), name='browse_emergencies'),
+    path('profile/all/', ProfileView.as_view(), name='profile_view'),
 
 
     # create views
@@ -38,7 +39,6 @@ urlpatterns = [
     path('911/', Create911View.as_view(), name='911_report'),
   
     # profile
-    path("profile/update/", UpdateUserView.as_view(), name="update_profile"),
-    path('profile/all/', ProfileView.as_view(), name='profile_view'),  
     path('profile/', ProfilePersonalDataView.as_view(), name='profilePersonal'),  
+    path("profile/update/", UpdateUserView.as_view(), name="update_profile"),
 ]

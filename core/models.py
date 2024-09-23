@@ -139,6 +139,21 @@ class AI_Emergency(models.Model):
         return f"AI_Emergency Analysis for Report_ID: {self.report.id} by {self.report.user.username}"
 
 
+class Problem_Authority_Location(models.Model):
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    authority_location = models.ForeignKey(Authority_Locations, related_name="problems", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Problem: {self.problem.id} is assigned to Authority: {self.authority_location.authority.name} in {self.authority_location.governorate}, {self.authority_location.markaz}"
+
+class Emergency_Authority_Location(models.Model):
+    emergency = models.ForeignKey(Emergency, on_delete=models.CASCADE)
+    authority_location = models.ForeignKey(Authority_Locations, related_name="emergencies", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Emergency: {self.emergency.id} is assigned to Authority: {self.authority_location.authority.name} in {self.authority_location.governorate}, {self.authority_location.markaz}"
+
+
 class Summary(models.Model):
     summary = models.CharField(max_length=1500)
     review_ids = models.CharField(max_length=255)
@@ -148,4 +163,5 @@ class Summary(models.Model):
 
     def __str__(self):
         return f"Summary for reports: {self.review_ids}"
+
 

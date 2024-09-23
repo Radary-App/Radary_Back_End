@@ -47,12 +47,13 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-
+# ---------------------------------------------------
 # Problem Serializer
 class ProblemSerializer(serializers.ModelSerializer):
     ai_description_english = serializers.SerializerMethodField()
     ai_description_arabic = serializers.SerializerMethodField()
-    title = serializers.SerializerMethodField()
+    title_arabic = serializers.SerializerMethodField()
+    title_english = serializers.SerializerMethodField()
     class Meta:
         model = Problem
         fields = [
@@ -65,7 +66,8 @@ class ProblemSerializer(serializers.ModelSerializer):
             'id',
             'ai_description_english',
             'ai_description_arabic',
-            'title',
+            'title_arabic',
+            'title_english'
         ]
 
     def get_ai_description_english(self, obj):
@@ -83,7 +85,15 @@ class ProblemSerializer(serializers.ModelSerializer):
         except AI_Problem.DoesNotExist:
             return None
 
-    def get_title(self, obj):
+    def get_title_arabic(self, obj):
+        try:
+            ai_problem = AI_Problem.objects.get(report=obj)
+            arabic_title = AI_Engine.translate(ai_problem.title)
+            return arabic_title
+        except AI_Problem.DoesNotExist:
+            return None
+
+    def get_title_english(self, obj):
         try:
             ai_problem = AI_Problem.objects.get(report=obj)
             return ai_problem.title
@@ -107,13 +117,16 @@ class ProblemSerializer(serializers.ModelSerializer):
         )
         return problem
 
+# ---------------------------------------------------
+# Emergency Serializer
 class EmergencySerializer(serializers.ModelSerializer):
     ai_description_english = serializers.SerializerMethodField()
     ai_description_arabic = serializers.SerializerMethodField()
-    title = serializers.SerializerMethodField()
+    title_arabic = serializers.SerializerMethodField()
+    title_english = serializers.SerializerMethodField()
     class Meta:
         model = Emergency
-        fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic', 'title']
+        fields = ['coordinates', 'photo', 'id', 'ai_description_english', 'ai_description_arabic', 'title_arabic', 'title_english']
 
     def get_ai_description_arabic(self, obj):
         try:
@@ -130,10 +143,18 @@ class EmergencySerializer(serializers.ModelSerializer):
         except AI_Emergency.DoesNotExist:
             return None
 
-    def get_title(self, obj):
+    def get_title_english(self, obj):
         try:
             ai_emergency = AI_Emergency.objects.get(report=obj)
             return ai_emergency.title
+        except AI_Emergency.DoesNotExist:
+            return None
+
+    def get_title_arabic(self, obj):
+        try:
+            ai_emergency = AI_Emergency.objects.get(report=obj)
+            arabic_title = AI_Engine.translate(ai_emergency.title)
+            return arabic_title
         except AI_Emergency.DoesNotExist:
             return None
 
@@ -153,7 +174,8 @@ class EmergencySerializer(serializers.ModelSerializer):
         )
         return emergency
 
-
+# ---------------------------------------------------
+# Review Serializer
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review

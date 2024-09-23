@@ -45,7 +45,7 @@ class CreateProblemView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):    
+    def post(self, request):
         user = request.user
         serializer = ProblemSerializer(data=request.data)
         if serializer.is_valid():
@@ -195,7 +195,7 @@ class ProfileView(APIView):
 
     def get(self,req):
         user = req.user
-        serializerEmergency = EmergencySerializer(user.emergency_set.all(), many=True)  
+        serializerEmergency = EmergencySerializer(user.emergency_set.all(), many=True)
         serializerProblem = ProblemSerializer(user.problem_set.all(), many=True)
 
         return Response({"emergency": serializerEmergency.data, "problem": serializerProblem.data}, status=status.HTTP_200_OK)
