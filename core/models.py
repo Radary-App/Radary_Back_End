@@ -118,7 +118,7 @@ class Authority_Locations(models.Model):
 
 
 class AI_Problem(models.Model):
-    report = models.OneToOneField(Problem, on_delete=models.CASCADE)
+    report = models.OneToOneField(Problem, related_name="ai", on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     priority = models.IntegerField(null=True, default=0) # 1 - 5 --> 1 is the highest
     authority_name = models.ForeignKey(Authority, related_name='ai_problems', on_delete=models.CASCADE)
@@ -129,7 +129,7 @@ class AI_Problem(models.Model):
         return f"AI_Problem Analysis for Report_ID: {self.report.id} by {self.report.user.username}"
 
 class AI_Emergency(models.Model):
-    report = models.OneToOneField(Emergency, on_delete=models.CASCADE)
+    report = models.OneToOneField(Emergency, related_name="ai", on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     danger_level = models.IntegerField(null=True, default=0) # 1 - 100 --> 100 is the highest

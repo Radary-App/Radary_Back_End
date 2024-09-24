@@ -84,13 +84,13 @@ def emergencies_ai_reports(sender, instance, created, **kwargs):
 
 #-------------------------------------------------------------
 # Helper functions
-
 def euclidean_distance(lat1, lon1, lat2, lon2):
     return math.sqrt((lat2 - lat1)**2 + (lon2 - lon1)**2)
 
 def find_nearest_authority_location(coordinates, authority):
     problem_lat, problem_lon = map(float, coordinates.split(','))
-    list_of_authorities = Authority_Locations.objects.filter(authority=authority)
+    authority_object = Authority.objects.get(name=authority)
+    list_of_authorities = Authority_Locations.objects.filter(authority=authority_object)
     min_distance = float('inf')
 
     for authority in list_of_authorities:
